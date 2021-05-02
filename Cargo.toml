@@ -1,0 +1,11 @@
+[package]
+name = "nnsearch-rs"
+version = "0.1.0"
+authors = ["mana-ysh <int.toshi13@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+clap = "2.33.3"
+nalgebra = "0.22.0"
+rand = "0.8.3"
+thiserror = "1.0"
