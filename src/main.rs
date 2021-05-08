@@ -18,11 +18,13 @@ fn main() {
                     .get_matches();
     if let Some(_matches) = matches.subcommand_matches("index") {
         println!("running indexing");
+        // TODO
         exit(0);
     }
 
     if let Some(_matches) = matches.subcommand_matches("search") {
         println!("running search");
+        // TODO
         exit(0);
     }
 }

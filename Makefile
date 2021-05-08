@@ -14,6 +14,9 @@ lint:
 test:
 	${CARGO} test -- --nocapture
 
+test-single:
+	${CARGO} test ${TARGET} -- --nocapture	
+
 check:
 	${CARGO} check
 

@@ -104,29 +104,22 @@ mod tests {
         assert_eq!(result, vec![0]);
     }
 
-    // fn test_nsw_index_dryrun() {
-    //     // node size > k
-    //     let mut index = NSWIndex::new(2, DistanceType::EUCLIDEAN, 3, 4);
-    //     index.add(vec![0.1, 0.2]).unwrap();
-    //     index.add(vec![0.1, 0.1]).unwrap();
-    //     index.add(vec![0.1, 0.1]).unwrap();
-    //     index.add(vec![0.1, 0.1]).unwrap();
-    //     index.add(vec![0.1, 0.1]).unwrap();
-    //     index.add(vec![0.1, 0.1]).unwrap();
-    //     index.add(vec![0.1, 0.1]).unwrap();
-    //     let result = index.search(vec![0.1, 0.1], 2).unwrap();
-    // }
+    #[test]
+    fn test_nsw_index_dryrun() {
+        // node size > k
+        let mut index = NSWIndex::new(2, DistanceType::EUCLIDEAN, 3, 4);
+        index.add(vec![0.1, 0.2]).unwrap();
+        index.add(vec![0.1, 0.3]).unwrap();
+        index.add(vec![0.1, 0.4]).unwrap();
+        index.add(vec![0.1, 0.5]).unwrap();
+        index.add(vec![0.1, 0.6]).unwrap();
+        index.add(vec![0.1, 0.7]).unwrap();
+        let result = index.search(vec![0.1, 0.1], 2).unwrap();
+    }
 
     #[bench]
     #[ignore]
     fn bench_naive(b: &mut test::Bencher) {
         // TODO
-        use std::{thread, time};
-        let ten_millis = time::Duration::from_millis(10000);
-        let now = time::Instant::now();
-
-        thread::sleep(ten_millis);
-
-        b.iter(|| 1+1)
     }
 }
