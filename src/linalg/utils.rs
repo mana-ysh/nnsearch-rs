@@ -19,7 +19,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_nsw() {
+    fn test_generate_matrix() {
         let mat: Vec<Vec<f32>> = generate_matrix(5, 10);
         assert_eq!(mat.len(), 5);
         for i in 0..mat.len() {
