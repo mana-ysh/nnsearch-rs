@@ -16,6 +16,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install nightly
+      run: rustup toolchain install nightly
     - name: Build
       run: make build
     - name: Run tests
