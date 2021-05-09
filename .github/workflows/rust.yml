@@ -20,5 +20,7 @@ jobs:
       run: rustup toolchain install nightly
     - name: Build
       run: make build
+    - name: Lint
+      run: make lint
     - name: Run tests
       run: make test

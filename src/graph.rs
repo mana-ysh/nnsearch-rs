@@ -97,8 +97,8 @@ impl NavigableSmallWorldGraph {
         let mut dist_cache = DistanceCache::new();
         let ids: Vec<&usize> = self.id2node.iter().map(|(k, v)| k).collect();
         for i in 0..self.trial {
-            let entry_id = ids.choose(&mut rng).unwrap().clone().clone();
-            candidates.insert(CostedItem {id: entry_id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&entry_id).unwrap())});
+            let entry_id = &(*ids.choose(&mut rng).unwrap()).clone();
+            candidates.insert(CostedItem {id: *entry_id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&entry_id).unwrap())});
             let mut temp_res = HashSet::new();
             loop {
                 let c = candidates.pop_first();
