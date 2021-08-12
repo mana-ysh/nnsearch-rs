@@ -5,14 +5,14 @@ use rand::Rng;
 pub fn generate_matrix(num: usize, dim: usize) -> Vec<Vec<f32>> {
     let mut rng = rand::thread_rng();
     let mut mat = vec![];
-    for i in 0..num {
+    for _i in 0..num {
         let mut vec = vec![];
-        for j in 0..dim {
+        for _j in 0..dim {
             vec.push(rng.gen::<f32>());
         }
         mat.push(vec);
     }
-    return mat
+    mat
 }
 
 mod tests {

@@ -78,8 +78,6 @@ pub struct NavigableSmallWorldGraph {
 
 impl NavigableSmallWorldGraph {
     fn approx_knn_search(&self, query: &VectorNode, k: usize) -> Vec<usize> {
-        let dist_cache = DistanceCache::new();
-
         if self.id2node.len() <= k {
             // FIXME: notify that returned result is not satisfied with size k.
             let mut incomplete_result: Vec<usize> = self.id2node.keys().cloned().collect();
@@ -95,8 +93,8 @@ impl NavigableSmallWorldGraph {
         let mut visited = HashSet::new();
         let mut result: BTreeSet<CostedItem> = BTreeSet::new();
         let mut dist_cache = DistanceCache::new();
-        let ids: Vec<&usize> = self.id2node.iter().map(|(k, v)| k).collect();
-        for i in 0..self.trial {
+        let ids: Vec<&usize> = self.id2node.iter().map(|(k, _v)| k).collect();
+        for _i in 0..self.trial {
             let entry_id = &(*ids.choose(&mut rng).unwrap()).clone();
             candidates.insert(CostedItem {id: *entry_id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&entry_id).unwrap())});
             let mut temp_res = HashSet::new();
@@ -115,7 +113,7 @@ impl NavigableSmallWorldGraph {
                 for &id in self.id2adjacency_ids.get(&c.id).unwrap_or(&vec![]) {
                     if !visited.contains(&id) {
                         visited.insert(id.clone());
-                        candidates.insert(CostedItem {id: id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
+                        candidates.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
                         temp_res.insert(id.clone());
                     }
                 }
@@ -124,7 +122,7 @@ impl NavigableSmallWorldGraph {
                     temp_res.insert(c.id.clone());
                 }
                 for &id in &temp_res {
-                    result.insert(CostedItem {id: id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
+                    result.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
                 }
             }
         }
@@ -176,8 +174,6 @@ impl GraphOperator for NavigableSmallWorldGraph {
 
 
 mod tests {
-    use super::*;
-
     #[test]
     fn test_nsw() {
         // pass 

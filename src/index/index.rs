@@ -10,7 +10,7 @@ trait VectorIndexOperator {
         for data in data_batch {
             self.add(data).unwrap();
         }
-        return Ok(())
+        Ok(())
     }
     fn search(&self, query: Vec<f32>, k: usize) -> Result<Vec<usize>, ()>;
 }
@@ -25,7 +25,7 @@ pub struct NaiveKnnIndex {
 impl VectorIndexOperator for NaiveKnnIndex {
     fn add(&mut self, data: Vec<f32>) -> Result<(), ()> {
         self.points.push(data);
-        return Ok(())
+        Ok(())
     }
     fn search(&self, query: Vec<f32>, k: usize) -> Result<Vec<usize>, ()> {
         let scores = self.points
@@ -34,7 +34,7 @@ impl VectorIndexOperator for NaiveKnnIndex {
             .collect::<Vec<_>>();
         let mut idx = (0..scores.len()).collect::<Vec<usize>>();
         idx.sort_by(|&i, &j| scores[i].partial_cmp(&scores[j]).unwrap());
-        return Ok(idx[..k].to_vec())
+        Ok(idx[..k].to_vec())
     }
 }
 
@@ -45,15 +45,15 @@ pub struct NSWIndex {
 }
 
 impl NSWIndex {
-    fn new(dim: usize, distance_type: DistanceType, trial: usize, min_degree: usize) -> Self {
+    pub fn new(dim: usize, distance_type: DistanceType, trial: usize, min_degree: usize) -> Self {
         return NSWIndex{
-            dim: dim,
+            dim,
             graph: Box::new(NavigableSmallWorldGraph{
-                trial: trial,
-                min_degree: min_degree,
+                trial,
+                min_degree,
                 id2adjacency_ids: HashMap::new(),
                 id2node: HashMap::new(),
-                distance_type: distance_type,
+                distance_type,
             }),
         }
     }

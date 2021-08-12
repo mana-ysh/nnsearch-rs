@@ -20,7 +20,7 @@ pub fn compute_euclidean_distance(p1: &Vec<f32>, p2: &Vec<f32>) -> Result<f32, N
     for i in 0..p1.len() {
         val += (p1[i] - p2[i]).powi(2);
     }
-    return Ok(val.sqrt());
+    Ok(val.sqrt())
 }
 
 #[cfg(test)]
