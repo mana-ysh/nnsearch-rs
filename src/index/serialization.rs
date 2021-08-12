@@ -1,8 +1,4 @@
 
 // TODO
-trait Serialisable {
-}
-
-// TODO
-trait Deserializable {
+trait Serializable {
 }

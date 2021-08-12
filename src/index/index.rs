@@ -116,10 +116,4 @@ mod tests {
         index.add(vec![0.1, 0.7]).unwrap();
         let result = index.search(vec![0.1, 0.1], 2).unwrap();
     }
-
-    #[bench]
-    #[ignore]
-    fn bench_naive(b: &mut test::Bencher) {
-        // TODO
-    }
 }
