@@ -56,13 +56,8 @@ impl DistanceCache {
     }
 
     fn get_distance(&mut self, distance_type: &DistanceType, query: &VectorNode, target: &VectorNode) -> f32 {
-        if !self.cache.contains_key(&target.id) {
-            self.cache.insert(
-                target.id,
-                calcurate_distance(distance_type, &query.vec, &target.vec)
-            );
-        } 
-        return self.cache.get(&target.id).unwrap().clone()
+        self.cache.entry(target.id).or_insert_with(|| calcurate_distance(distance_type, &query.vec, &target.vec));
+        *self.cache.get(&target.id).unwrap()
     }
 }
 
@@ -112,14 +107,14 @@ impl NavigableSmallWorldGraph {
                 }
                 for &id in self.id2adjacency_ids.get(&c.id).unwrap_or(&vec![]) {
                     if !visited.contains(&id) {
-                        visited.insert(id.clone());
+                        visited.insert(id);
                         candidates.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
-                        temp_res.insert(id.clone());
+                        temp_res.insert(id);
                     }
                 }
                 if !visited.contains(&c.id) {
-                    visited.insert(c.id.clone());
-                    temp_res.insert(c.id.clone());
+                    visited.insert(c.id);
+                    temp_res.insert(c.id);
                 }
                 for &id in &temp_res {
                     result.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
@@ -132,15 +127,16 @@ impl NavigableSmallWorldGraph {
 
 
 pub trait GraphOperator {
-    fn add_node(&mut self, node: VectorNode) -> Result<(), ()>;
+    #[allow(clippy::result_unit_err)] fn add_node(&mut self, node: VectorNode) -> Result<(), ()>;
     fn get_node(&self, id: &usize) -> Option<&VectorNode>;
     fn search_nearest_neighbor(&self, query: &VectorNode, k: usize) -> Vec<usize>;
     fn len(&self) -> usize;
+    fn is_empty(&self) -> bool;
 }
 
 impl GraphOperator for NavigableSmallWorldGraph {
     fn add_node(&mut self, node: VectorNode) -> Result<(), ()> {
-        if self.id2node.len() == 0 {
+        if self.id2node.is_empty() {
             self.id2node.insert(node.id, node);
             return Ok(())
         }
@@ -152,24 +148,27 @@ impl GraphOperator for NavigableSmallWorldGraph {
         nn_ids.iter().for_each(|nn_id|
             {
                 if !self.id2adjacency_ids.contains_key(nn_id) {
-                    self.id2adjacency_ids.insert(nn_id.clone(), vec![]);
+                    self.id2adjacency_ids.insert(*nn_id, vec![]);
                 }
-                self.id2adjacency_ids.get_mut(nn_id).unwrap().push(node.id.clone())
+                self.id2adjacency_ids.get_mut(nn_id).unwrap().push(node.id)
             }
         );
         self.id2node.insert(node.id, node);
         Ok(())
     }
     fn get_node(&self, id: &usize) -> Option<&VectorNode> {
-        return self.id2node.get(id)
+        self.id2node.get(id)
     }
     fn search_nearest_neighbor(&self, query: &VectorNode, k: usize) -> Vec<usize> {
-        return self.approx_knn_search(query, k);
+        self.approx_knn_search(query, k)
+    }
+    fn len(&self) -> usize {
+        self.id2node.len()
+    }
+    fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
-    fn len(&self) -> usize {
-        return self.id2node.len()
-    }
 }
 
 

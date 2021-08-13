@@ -6,13 +6,13 @@ pub enum DistanceType {
     EUCLIDEAN
 }
 
-pub fn calcurate_distance(distance_type: &DistanceType, v1: &Vec<f32>, v2: &Vec<f32>) -> f32 {
+pub fn calcurate_distance(distance_type: &DistanceType, v1: &[f32], v2: &[f32]) -> f32 {
     match distance_type {
         DistanceType::EUCLIDEAN => compute_euclidean_distance(v1, v2).unwrap()
     }
 }
 
-pub fn compute_euclidean_distance(p1: &Vec<f32>, p2: &Vec<f32>) -> Result<f32, NNSearchError> {
+pub fn compute_euclidean_distance(p1: &[f32], p2: &[f32]) -> Result<f32, NNSearchError> {
     if p1.len() != p2.len() {
         return Err(NNSearchError::ValueError(format!("Inconsistent length: {} != {}", p1.len(), p2.len())))
     }

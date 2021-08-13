@@ -1,4 +1,3 @@
-
 use std::collections::HashMap;
 
 use crate::linalg::distance::{DistanceType, calcurate_distance};
@@ -46,7 +45,7 @@ pub struct NSWIndex {
 
 impl NSWIndex {
     pub fn new(dim: usize, distance_type: DistanceType, trial: usize, min_degree: usize) -> Self {
-        return NSWIndex{
+        NSWIndex{
             dim,
             graph: Box::new(NavigableSmallWorldGraph{
                 trial,
@@ -61,6 +60,10 @@ impl NSWIndex {
 
 impl VectorIndexOperator for NSWIndex {
     fn add(&mut self, data: Vec<f32>) -> Result<(), ()> {
+        if data.len() != self.dim {
+            // TODO
+            panic!("invalid dim");
+        }
         self.graph.add_node(
             VectorNode{id: self.graph.len(), vec: data}
         )
@@ -114,6 +117,6 @@ mod tests {
         index.add(vec![0.1, 0.5]).unwrap();
         index.add(vec![0.1, 0.6]).unwrap();
         index.add(vec![0.1, 0.7]).unwrap();
-        let result = index.search(vec![0.1, 0.1], 2).unwrap();
+        index.search(vec![0.1, 0.1], 2).unwrap();
     }
 }

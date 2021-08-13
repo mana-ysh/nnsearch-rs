@@ -8,7 +8,7 @@ install:
 	${CARGO} --path .
 
 lint:
-	${CARGO} clippy
+	${CARGO} clippy -- -D warnings
 
 test:
 	${CARGO} test -- --nocapture

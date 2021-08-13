@@ -16,11 +16,9 @@ pub fn generate_matrix(num: usize, dim: usize) -> Vec<Vec<f32>> {
 }
 
 mod tests {
-    use super::*;
-
     #[test]
     fn test_generate_matrix() {
-        let mat: Vec<Vec<f32>> = generate_matrix(5, 10);
+        let mat: Vec<Vec<f32>> = super::generate_matrix(5, 10);
         assert_eq!(mat.len(), 5);
         for i in 0..mat.len() {
             assert_eq!(mat.get(i).unwrap().len(), 10)
