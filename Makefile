@@ -9,6 +9,7 @@ install:
 	${CARGO} --path .
 
 lint:
+	cargo clippy --version
 	${CARGO} clippy -- -D warnings
 
 test:
