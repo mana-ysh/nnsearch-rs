@@ -1,6 +1,7 @@
 .PHONY: build install lint test check clean bench
 
-CARGO := cargo
+# NOTE: nightly due to feature(map_first_last)
+CARGO := cargo +nightly
 build:
 	${CARGO} build
 
