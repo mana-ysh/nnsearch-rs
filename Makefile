@@ -8,9 +8,9 @@ build:
 install:
 	${CARGO} --path .
 
+# NOTE: allow needless-borrow due to clippy version inconsistency
 lint:
-	cargo clippy --version
-	${CARGO} clippy -- -D warnings
+	${CARGO} clippy -- -D warnings -A clippy::needless-borrow
 
 test:
 	${CARGO} test -- --nocapture
