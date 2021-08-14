@@ -1,4 +1,5 @@
 
+use crate::type_utils::FloatScalar;
 use crate::error::NNSearchError;
 
 #[derive(Debug)]
@@ -6,19 +7,19 @@ pub enum DistanceType {
     EUCLIDEAN
 }
 
-pub fn calcurate_distance(distance_type: &DistanceType, v1: &[f32], v2: &[f32]) -> f32 {
+pub fn calcurate_distance<T: FloatScalar>(distance_type: &DistanceType, v1: &[T], v2: &[T]) -> T {
     match distance_type {
         DistanceType::EUCLIDEAN => compute_euclidean_distance(v1, v2).unwrap()
     }
 }
 
-pub fn compute_euclidean_distance(p1: &[f32], p2: &[f32]) -> Result<f32, NNSearchError> {
+pub fn compute_euclidean_distance<T: FloatScalar>(p1: &[T], p2: &[T]) -> Result<T, NNSearchError> {
     if p1.len() != p2.len() {
         return Err(NNSearchError::ValueError(format!("Inconsistent length: {} != {}", p1.len(), p2.len())))
     }
-    let mut val = 0.0;
+    let mut val = T::get_zero();
     for i in 0..p1.len() {
-        val += (p1[i] - p2[i]).powi(2);
+        val = val + (p1[i] - p2[i]) * (p1[i] - p2[i]);
     }
     Ok(val.sqrt())
 }
