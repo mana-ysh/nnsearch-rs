@@ -1,5 +1,7 @@
 use crate::type_utils::FloatScalar;
 use ndarray::{Array, Array2, aview1};
+use ndarray_rand::rand_distr::StandardNormal;
+use ndarray_rand::RandomExt;
 
 pub trait Hasher<T, U> {
     // used Vec to returnd the sized type
@@ -13,9 +15,9 @@ pub struct RandomProjection<T: FloatScalar> {
 
 impl RandomProjection<f32> {
     pub fn new(src_dim: usize, trg_dim: usize) -> Self {
+        let mut rng = rand::thread_rng();
         RandomProjection {
-            // TODO
-            rand_mat: Array::zeros((src_dim, trg_dim))
+            rand_mat: Array::random_using((src_dim, trg_dim), StandardNormal, &mut rng)
         }
     }
 }
@@ -25,7 +27,6 @@ impl Hasher<f32, f32> for RandomProjection<f32> {
         aview1(input).dot(&self.rand_mat).to_vec()
     }
 }
-
 
 #[cfg(test)]
 mod test {
