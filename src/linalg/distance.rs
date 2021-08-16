@@ -1,9 +1,10 @@
-
 use crate::type_utils::FloatScalar;
 use crate::error::NNSearchError;
 
+/// Type of the distance between two objects.
 #[derive(Debug)]
 pub enum DistanceType {
+    /// Euclidean distance
     EUCLIDEAN
 }
 

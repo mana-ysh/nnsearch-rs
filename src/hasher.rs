@@ -28,6 +28,17 @@ impl Hasher<f32, f32> for RandomProjection<f32> {
     }
 }
 
+#[derive(Debug)]
+pub struct MinHash {
+}
+
+impl Hasher<i32, i32> for MinHash {
+    fn to_hash(&self, input: &[i32]) -> Vec<i32> {
+        // TODO
+        input.to_vec()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
