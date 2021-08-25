@@ -1,7 +1,7 @@
 // Implementations of hashers are based on `lsh-rs` crate
 // https://github.com/ritchie46/lsh-rs/blob/9e81c018872868b319e5fe4d23495ee031117e91/lsh-rs/src/hash.rs#L1
 use crate::type_utils::{FloatScalar, SetItem};
-use crate::linalg::utils::get_rng;
+use crate::linalg::utils::{get_rng, to_lowest_b_bit_vector};
 use ndarray::prelude::*;
 use ndarray::{Array, Array2, aview1};
 use ndarray_rand::rand_distr::StandardNormal;
@@ -53,9 +53,9 @@ impl MinHash {
             slice += &aview1(&permutation_idx);
         }
         MinHash {
-            pi_mat: pi_mat,
-            k: k,
-            dim: dim,
+            pi_mat,
+            k,
+            dim,
         }
     }
 }
@@ -70,7 +70,7 @@ impl Hasher<SetItem, SetItem> for MinHash {
         let hash = permutated.map_axis(Axis(1), |view| {
             view.into_iter().fold(self.dim, |acc, v| {
                 if *v > Zero::zero() {
-                    let v = v.clone() as SetItem;
+                    let v = *v as SetItem;
                     if v < acc {
                         v
                     } else {
@@ -87,12 +87,25 @@ impl Hasher<SetItem, SetItem> for MinHash {
 
 #[derive(Debug)]
 pub struct BBitMinHash {
+    minhash: MinHash,
+    b: usize,
 }
 
-impl Hasher<i32, bool> for BBitMinHash {
-    fn to_hash(&self, input: &[i32]) -> Vec<bool> {
-        // TODO
-        vec![input[0] == 0]
+impl BBitMinHash {
+    pub fn new(k: usize, dim: usize, b: usize) -> Self {
+        let minhash = MinHash::new(k, dim);
+        BBitMinHash {minhash, b}
+    }
+}
+
+impl Hasher<SetItem, bool> for BBitMinHash {
+    fn to_hash(&self, input: &[SetItem]) -> Vec<bool> {
+        // FIXME: more effective?
+        let hash = self.minhash.to_hash(input);
+        hash.into_iter().fold(vec![], |mut acc, v| {
+            acc.extend(to_lowest_b_bit_vector(v, self.b));
+            acc
+        })
     }
 }
 
@@ -116,6 +129,17 @@ mod test {
         let v1 = vec![1, 2, 4];
         let hashed_v1 = minhash.to_hash(&v1);
         assert_eq!(hashed_v1.len(), k);
+    }
+
+    #[test]
+    fn test_bbitminhash() {
+        let k = 3;
+        let dim =5;
+        let b = 2;
+        let minhash = BBitMinHash::new(k, dim, b);
+        let v1 = vec![1, 2, 4];
+        let hashed_v1 = minhash.to_hash(&v1);
+        assert_eq!(hashed_v1.len(), k*b);
     }
 
     #[test]

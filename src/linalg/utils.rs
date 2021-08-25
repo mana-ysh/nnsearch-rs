@@ -21,6 +21,21 @@ pub fn get_rng(seed: u64) -> SmallRng {
     SmallRng::seed_from_u64(seed)
 }
 
+pub fn to_lowest_b_bit_vector(value: usize, b: usize) -> Vec<bool> {
+    let mut vec = vec![];
+    let mut inter_value = value;
+    for _ in 0..b {
+        if inter_value % 2 == 1 {
+            vec.push(true);
+        } else {
+            vec.push(false);
+        }
+        inter_value /= 2;
+    }
+    vec
+}
+
+
 mod tests {
     #[test]
     fn test_generate_matrix() {
@@ -29,6 +44,15 @@ mod tests {
         for i in 0..mat.len() {
             assert_eq!(mat.get(i).unwrap().len(), 10)
         }
+    }
+
+    #[test]
+    fn test_to_lowest_b_bit_vector() {
+        assert_eq!(super::to_lowest_b_bit_vector(7, 2), vec![true, true]);
+        assert_eq!(super::to_lowest_b_bit_vector(6, 2), vec![false, true]);
+        assert_eq!(super::to_lowest_b_bit_vector(8, 2), vec![false, false]);
+        assert_eq!(super::to_lowest_b_bit_vector(12, 4), vec![false, false, true, true]);
+        assert_eq!(super::to_lowest_b_bit_vector(12, 5), vec![false, false, true, true, false]);
     }
 
 }
