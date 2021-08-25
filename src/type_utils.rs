@@ -1,6 +1,8 @@
 use num::{Float};
 use std::fmt::{Debug, Display};
 
+pub type SetItem = usize;
+
 pub trait FloatScalar: Float + Debug + Display {
     fn get_zero() -> Self;
 }
