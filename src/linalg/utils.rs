@@ -1,9 +1,11 @@
 
 use rand::Rng;
+use rand::SeedableRng;
+use rand::rngs::SmallRng;
 
 
 pub fn generate_matrix(num: usize, dim: usize) -> Vec<Vec<f32>> {
-    let mut rng = rand::thread_rng();
+    let mut rng = get_rng(46);
     let mut mat = vec![];
     for _i in 0..num {
         let mut vec = vec![];
@@ -13,6 +15,10 @@ pub fn generate_matrix(num: usize, dim: usize) -> Vec<Vec<f32>> {
         mat.push(vec);
     }
     mat
+}
+
+pub fn get_rng(seed: u64) -> SmallRng {
+    SmallRng::seed_from_u64(seed)
 }
 
 mod tests {

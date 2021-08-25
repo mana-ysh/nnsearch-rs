@@ -4,6 +4,7 @@ use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet, BTreeSet};
 
 use crate::linalg::distance::{DistanceType, calcurate_distance};
+use crate::linalg::utils::get_rng;
 
 #[derive(Debug)]
 pub struct VectorNode {
@@ -83,7 +84,7 @@ impl NavigableSmallWorldGraph {
             return incomplete_result
         }
         // The algorithm here is based on https://publications.hse.ru/mirror/pubs/share/folder/x5p6h7thif/direct/128296059
-        let mut rng = rand::thread_rng();
+        let mut rng = get_rng(46);
         let mut candidates: BTreeSet<CostedItem> = BTreeSet::new();
         let mut visited = HashSet::new();
         let mut result: BTreeSet<CostedItem> = BTreeSet::new();
