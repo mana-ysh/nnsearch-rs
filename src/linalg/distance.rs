@@ -31,7 +31,6 @@ pub fn compute_hamming_distance(p1: &[bool], p2: &[bool]) -> Result<u32, NNSearc
     if p1.len() != p2.len() {
         return Err(NNSearchError::ValueError(format!("Inconsistent length: {} != {}", p1.len(), p2.len())))
     }
-    // FIXME: parallelizable
     let val =(0..p1.len()).fold(0, |dist, idx| {
         if p1[idx] == p2[idx] {
             dist
