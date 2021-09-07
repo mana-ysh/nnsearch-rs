@@ -1,17 +1,14 @@
-
+use crate::linalg::distance::{PairwiseDistance};
+use crate::linalg::utils::get_rng;
 use rand::seq::SliceRandom;
 use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet, BTreeSet};
-
-use crate::linalg::distance::{DistanceType, calcurate_distance};
-use crate::linalg::utils::get_rng;
 
 #[derive(Debug)]
 pub struct VectorNode {
     pub id: usize,
     pub vec: Vec<f32>,
 }
-
 
 #[derive(Debug)]
 struct CostedItem {
@@ -56,8 +53,8 @@ impl DistanceCache {
         }
     }
 
-    fn get_distance(&mut self, distance_type: &DistanceType, query: &VectorNode, target: &VectorNode) -> f32 {
-        self.cache.entry(target.id).or_insert_with(|| calcurate_distance(distance_type, &query.vec, &target.vec));
+    #[allow(clippy::borrowed_box)] fn get_distance(&mut self, distance: &Box<dyn PairwiseDistance<f32, f32>>, query: &VectorNode, target: &VectorNode) -> f32 {
+        self.cache.entry(target.id).or_insert_with(|| distance.compute(&query.vec, &target.vec).unwrap());
         *self.cache.get(&target.id).unwrap()
     }
 }
@@ -68,7 +65,7 @@ pub struct NavigableSmallWorldGraph {
     pub min_degree: usize,
     pub id2adjacency_ids: HashMap<usize, Vec<usize>>,
     pub id2node: HashMap<usize, VectorNode>,
-    pub distance_type: DistanceType,
+    pub distance: Box<dyn PairwiseDistance<f32, f32>>,
 }
 
 
@@ -79,8 +76,8 @@ impl NavigableSmallWorldGraph {
             let mut incomplete_result: Vec<usize> = self.id2node.keys().cloned().collect();
             incomplete_result.sort_by(
                 |&a, &b|
-                calcurate_distance(&self.distance_type, &query.vec, &self.get_node(&a).unwrap().vec)
-                    .partial_cmp(&calcurate_distance(&self.distance_type, &query.vec, &self.get_node(&b).unwrap().vec)).unwrap());
+                self.distance.compute(&query.vec, &self.get_node(&a).unwrap().vec).unwrap()
+                    .partial_cmp(&self.distance.compute(&query.vec, &self.get_node(&b).unwrap().vec).unwrap()).unwrap());
             return incomplete_result
         }
         // The algorithm here is based on https://publications.hse.ru/mirror/pubs/share/folder/x5p6h7thif/direct/128296059
@@ -92,7 +89,7 @@ impl NavigableSmallWorldGraph {
         let ids: Vec<&usize> = self.id2node.iter().map(|(k, _v)| k).collect();
         for _i in 0..self.trial {
             let entry_id = &(*ids.choose(&mut rng).unwrap()).clone();
-            candidates.insert(CostedItem {id: *entry_id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&entry_id).unwrap())});
+            candidates.insert(CostedItem {id: *entry_id, cost: dist_cache.get_distance(&self.distance, &query, self.get_node(&entry_id).unwrap())});
             let mut temp_res = HashSet::new();
             loop {
                 let c = candidates.pop_first();
@@ -101,7 +98,7 @@ impl NavigableSmallWorldGraph {
                 }
                 let c = c.unwrap();
                 if result.len() >= k {
-                    let kth_dist = dist_cache.get_distance(&self.distance_type, &query, self.get_node(&result.iter().nth(k-1).unwrap().id).unwrap());
+                    let kth_dist = dist_cache.get_distance(&self.distance, &query, self.get_node(&result.iter().nth(k-1).unwrap().id).unwrap());
                     if kth_dist <= c.cost {
                         break
                     }
@@ -109,7 +106,7 @@ impl NavigableSmallWorldGraph {
                 for &id in self.id2adjacency_ids.get(&c.id).unwrap_or(&vec![]) {
                     if !visited.contains(&id) {
                         visited.insert(id);
-                        candidates.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
+                        candidates.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance, &query, self.get_node(&id).unwrap())});
                         temp_res.insert(id);
                     }
                 }
@@ -118,7 +115,7 @@ impl NavigableSmallWorldGraph {
                     temp_res.insert(c.id);
                 }
                 for &id in &temp_res {
-                    result.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance_type, &query, self.get_node(&id).unwrap())});
+                    result.insert(CostedItem {id, cost: dist_cache.get_distance(&self.distance, &query, self.get_node(&id).unwrap())});
                 }
             }
         }

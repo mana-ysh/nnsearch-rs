@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::linalg::distance::{DistanceType, calcurate_distance};
+use crate::linalg::distance::PairwiseDistance;
 use crate::graph::{GraphOperator, NavigableSmallWorldGraph, VectorNode};
 
 trait VectorIndexOperator {
@@ -17,7 +17,7 @@ trait VectorIndexOperator {
 #[derive(Debug)]
 pub struct NaiveKnnIndex {
     dim: usize,
-    distance_type: DistanceType,
+    distance: Box<dyn PairwiseDistance<f32, f32>>,
     points: Vec<Vec<f32>>,
 }
 
@@ -29,7 +29,7 @@ impl VectorIndexOperator for NaiveKnnIndex {
     fn search(&self, query: Vec<f32>, k: usize) -> Result<Vec<usize>, ()> {
         let scores = self.points
             .iter()
-            .map(|vec| calcurate_distance(&self.distance_type, &query, &vec))
+            .map(|vec| self.distance.compute(&query, &vec).unwrap())
             .collect::<Vec<_>>();
         let mut idx = (0..scores.len()).collect::<Vec<usize>>();
         idx.sort_by(|&i, &j| scores[i].partial_cmp(&scores[j]).unwrap());
@@ -44,7 +44,7 @@ pub struct NSWIndex {
 }
 
 impl NSWIndex {
-    pub fn new(dim: usize, distance_type: DistanceType, trial: usize, min_degree: usize) -> Self {
+    pub fn new(dim: usize, distance: Box<dyn PairwiseDistance<f32, f32>>, trial: usize, min_degree: usize) -> Self {
         NSWIndex{
             dim,
             graph: Box::new(NavigableSmallWorldGraph{
@@ -52,7 +52,7 @@ impl NSWIndex {
                 min_degree,
                 id2adjacency_ids: HashMap::new(),
                 id2node: HashMap::new(),
-                distance_type,
+                distance,
             }),
         }
     }
@@ -78,11 +78,12 @@ impl VectorIndexOperator for NSWIndex {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::linalg::distance::Euclidean;
 
     #[test]
     fn test_naive_index() {
         
-        let mut index = NaiveKnnIndex{ dim: 2, distance_type: DistanceType::EUCLIDEAN, points: vec![] };
+        let mut index = NaiveKnnIndex{ dim: 2, distance: Box::new(Euclidean{}), points: vec![] };
         index.add(vec![0.1, 0.2]).unwrap();
         index.add(vec![0.1, 0.1]).unwrap();
         let result = index.search(vec![0.1, 0.1], 2).unwrap();
@@ -96,7 +97,7 @@ mod tests {
     #[test]
     fn test_nsw_index() {
         // node size < k
-        let mut index = NSWIndex::new(2, DistanceType::EUCLIDEAN, 3, 4);
+        let mut index = NSWIndex::new(2, Box::new(Euclidean{}), 3, 4);
         index.add(vec![0.1, 0.2]).unwrap();
         index.add(vec![0.1, 0.1]).unwrap();
         let result = index.search(vec![0.1, 0.1], 2).unwrap();
@@ -110,7 +111,7 @@ mod tests {
     #[test]
     fn test_nsw_index_dryrun() {
         // node size > k
-        let mut index = NSWIndex::new(2, DistanceType::EUCLIDEAN, 3, 4);
+        let mut index = NSWIndex::new(2, Box::new(Euclidean{}), 3, 4);
         index.add(vec![0.1, 0.2]).unwrap();
         index.add(vec![0.1, 0.3]).unwrap();
         index.add(vec![0.1, 0.4]).unwrap();
